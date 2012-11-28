@@ -90,12 +90,8 @@ module Restly::Base::Instance
   def set_response(response)
     raise Restly::Error::InvalidResponse unless response.is_a? OAuth2::Response
     @response = response
-    if response.try(:body)
-      if response_has_errors?(response)
-        set_errors_from_response
-      else
-        set_attributes_from_response
-      end
+    if response_has_errors?(response)
+      set_errors_from_response
     end
   end
 

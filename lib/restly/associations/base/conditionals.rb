@@ -7,15 +7,11 @@ module Restly::Associations::Base::Conditionals
   end
 
   def collection?
-    false
+    type == :collection
   end
 
-  def embedded?
-    false
-  end
-
-  def nested?
-    false
+  def instance?
+    type == :instance
   end
 
 end

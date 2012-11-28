@@ -12,18 +12,8 @@ module Restly::Associations
   autoload :HasOne
   autoload :HasOneThrough
   autoload :ClassMethods
-
-  class AssociationsHash < HashWithIndifferentAccess
-  end
-
-  class IndifferentSet < Set
-
-    def include?(attr)
-      return super unless attr.is_a?(Symbol) || attr.is_a?(String)
-      super(attr.to_s) || super(attr.to_sym)
-    end
-
-  end
+  autoload :Handler
+  autoload :Definition
 
   included do
 
@@ -32,7 +22,9 @@ module Restly::Associations
 
     class_attribute :resource_associations, instance_reader: false, instance_writer: false
 
-    self.resource_associations = AssociationsHash.new
+    self.resource_associations = HashWithIndifferentAccess.new
+
+    before_save :resource_association_handler_callbacks
 
     inherited do
       self.resource_associations = resource_associations.dup
@@ -44,59 +36,19 @@ module Restly::Associations
     self.class.resource_name
   end
 
-  def associations
-    IndifferentSet.new self.class.reflect_on_all_resource_associations.keys.map(&:to_sym)
-  end
-
-  def respond_to_association?(m)
-    (matched = ATTR_MATCHER.match m) && associations.include?(matched[:attr].to_sym)
-  end
-
-  def respond_to?(m, include_private = false)
-    respond_to_association?(m) || super
-  end
-
   private
 
-  def association_attributes
-    @association_attributes ||= HashWithIndifferentAccess.new
+  def association_handlers
+    @association_handlers ||= HashWithIndifferentAccess.new
   end
 
-  def loaded_associations
-    @loaded_associations ||= HashWithIndifferentAccess.new
+  def association_handler(name)
+    association_handlers[name] ||= self.class.reflect_on_resource_association(name).handler(self)
   end
 
-  def set_association(attr, val)
-    association = self.class.reflect_on_resource_association(attr)
-    association.valid?(val)
-    association_attributes[attr] = val
-  end
-
-  def get_association(attr, options={})
-    return loaded_associations[attr] if loaded_associations[attr].present?
-    ActiveSupport::Notifications.instrument("load_association.restly", model: self.class.name, association: attr) do
-      association = self.class.reflect_on_resource_association(attr)
-
-      loaded_associations[attr] = if (stubbed = association.stub self, association_attributes[attr]).present?
-                                    stubbed
-                                  elsif (loaded = association.load self, options).present?
-                                    loaded
-                                  else
-                                    association.build(self)
-                                  end
-    end
-  end
-
-  def association_missing(m, *args)
-    if (matched = ATTR_MATCHER.match m) && associations.include?(attr = matched[:attr].to_sym)
-      case !!matched[:setter]
-        when true
-          set_association(attr, *args)
-        when false
-          get_association(attr)
-      end
-    else
-      raise Restly::Error::InvalidAssociation, "Association is invalid"
+  def resource_association_handler_callbacks
+    (@association_handlers ||= {}).each do |name, handler|
+      handler.run_callbacks
     end
   end
 

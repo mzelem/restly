@@ -1,11 +1,10 @@
 class Restly::Proxies::Associations::Instance < Restly::Proxies::Base
 
-  attr_reader :parent, :joiner
+  attr_reader :handler
 
-  def initialize(instance, parent, joiner=nil)
+  def initialize(instance, handler)
     super(instance)
-    @parent = parent
-    @joiner = joiner
+    @handler = handler
   end
 
 end

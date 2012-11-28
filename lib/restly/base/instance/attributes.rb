@@ -14,9 +14,10 @@ module Restly::Base::Instance::Attributes
   end
 
   def attributes
-    fields.reduce(HashWithIndifferentAccess.new) do |hash, key|
-      hash[key] = read_attribute(key, autoload: false)
-      hash
+    if @attributes.present?
+      @attributes
+    else
+      @attributes = attributes_from_response
     end
   end
 
@@ -45,13 +46,9 @@ module Restly::Base::Instance::Attributes
   end
 
   def inspect
-    inspection = if @attributes
-                   fields.map { |name|
-                     "#{name}: #{attribute_for_inspect(name)}"
-                   }.compact.join(", ")
-                 else
-                   "not initialized"
-                 end
+    inspection = fields.map { |name|
+                   "#{name}: #{attribute_for_inspect(name)}"
+                 }.compact.join(", ")
     "#<#{self.class} #{inspection}>"
   end
 
@@ -93,7 +90,7 @@ module Restly::Base::Instance::Attributes
       load!
     end
 
-    @attributes[attr.to_sym]
+    attributes[attr.to_sym]
   end
 
   def attribute_for_inspect(attr_name)
@@ -105,12 +102,15 @@ module Restly::Base::Instance::Attributes
     end
   end
 
-  def set_attributes_from_response(response=self.response)
-    self.attributes = parsed_response(response)
+  def attributes_from_response
+    parsed_response.reduce(HashWithIndifferentAccess.new) do |hash, (k,v)|
+      hash[k] = convert_attr_type(v) if k.in?(fields)
+      hash
+    end
   end
 
   def attribute_loaded?(attr)
-    @attributes.has_key? attr
+    attributes.has_key? attr
   end
 
   def attribute_not_loaded?(attr)

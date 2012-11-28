@@ -12,7 +12,7 @@ module Restly::Base::Instance::ErrorHandling
   private
 
   def response_has_errors?(response=self.response)
-    @response.status >= 400 ||
+    response.status >= 400 ||
       (parsed_response(response).is_a?(Hash) &&
         (parsed_response(response)[:errors] || parsed_response(response)[:error]))
   end

@@ -12,6 +12,7 @@ module Restly
   autoload :Collection
   autoload :ControllerMethods
   autoload :Associations
+  autoload :LocalAssociations
   autoload :EmbeddedAssociations
   autoload :NestedAttributes
   autoload :Error

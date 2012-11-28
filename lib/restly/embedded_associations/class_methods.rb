@@ -2,54 +2,22 @@ module Restly::EmbeddedAssociations::ClassMethods
 
   private
 
-  # Embeds One
-  def embeds_resource(name, options = {})
-    exclude_field(name)
-    self.resource_associations[name] = association = Restly::EmbeddedAssociations::EmbedsOne.new(self, name, options)
-
-    define_method name do |options={}|
-      return get_association(name) if get_association(name).present?
-      set_association name, association.stub(self)
-    end
-
-    define_method "#{name}=" do |value|
-      set_association name, value
-    end
-
+  # Belongs to
+  def embedded_in(name, options = {})
+    exclude_field(name) if ancestors.include?(Restly::Base)
+    self.resource_associations[name] = Restly::LocalAssociations::Definition.new(self, name, :embedded_in, options)
   end
 
-  # Embeds Many
-  def embeds_resources(name, options = {})
-    exclude_field(name)
-    self.resource_associations[name] = association = Restly::EmbeddedAssociations::EmbedsMany.new(self, name, options)
-
-    define_method name do |options={}|
-      get_association(name, options)
-    end
-
-    define_method "#{name}=" do |value|
-      set_association name, value
-    end
-
+  # Has One
+  def embeds_one(name, options = {})
+    exclude_field(name) if ancestors.include?(Restly::Base)
+    self.resource_associations[name] = Restly::LocalAssociations::Definition.new(self, name, :embeds_one, options)
   end
 
-  def embedded_in(name, options={})
-    self.resource_associations[name] = association = Restly::EmbeddedAssociations::EmbeddedIn.new(self, name, options)
-
-    define_method name do |options={}|
-      get_association(name, options)
-    end
-
-    define_method "#{name}=" do |value|
-      set_association name, value
-    end
-
-    [:save, :delete, :destroy].each do |method|
-      define_method method do
-        raise NotImplemented, "Embedded actions have not been implemented."
-      end
-    end
-
+  # Has One
+  def embeds_many(name, options = {})
+    exclude_field(name) if ancestors.include?(Restly::Base)
+    self.resource_associations[name] = Restly::LocalAssociations::Definition.new(self, name, :embeds_many, options)
   end
 
 end

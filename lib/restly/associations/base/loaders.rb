@@ -9,31 +9,17 @@ module Restly::Associations::Base::Loaders
     association = authorize(options[:authorize]).with_path(parent, options[:path])
 
     # Load Collection or Instance
-    collection? ? association.load_collection(parent) : association.load_instance(parent)
+    collection? ? association.send(:load_collection, parent) : association.send(:load_instance, parent)
   end
 
-  def load_collection(parent, association_class = self.association_class)
-    raise Restly::Error::AssociationError, "Not a collection" unless collection?
-    collection = if embedded?
-                   []
-                 else
-                   association_class.all
-                 end
+  private
 
-    Restly::Proxies::Associations::Collection.new(collection, parent)
+  def load_collection(*args)
+    raise Restly::Error::NotImplemented, ":#{__method__} not Implemented on this association"
   end
 
-  def load_instance(parent, association_class = self.association_class)
-    raise Restly::Error::AssociationError, "Not an instance" if collection?
-    return nil if embedded?
-    instance = if parent.attributes.has_key? "#{name}_id"
-                 foreign_key = parent.attributes["#{name}_id"]
-                 return nil unless foreign_key
-                 association_class.find(foreign_key)
-               else
-                 association_class.instance_from_response association_class.connection.get(association_class.path)
-               end
-    Restly::Proxies::Associations::Instance.new(instance, parent)
+  def load_instance(*args)
+    raise Restly::Error::NotImplemented, ":#{__method__} not Implemented on this association"
   end
 
 end
