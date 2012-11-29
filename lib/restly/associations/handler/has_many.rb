@@ -27,7 +27,7 @@ class Restly::Associations::Handler::HasMany < Restly::Associations::Handler
     return nil unless (collection = parent.parsed_response[name.to_s])
     collection.map do |attributes|
       attributes.slice!(*association_class.fields)
-      association_class.new(attributes)
+      association_class.new(attributes, loaded: false)
     end
   end
 

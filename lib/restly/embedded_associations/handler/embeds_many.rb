@@ -1,7 +1,6 @@
 class Restly::EmbeddedAssociations::Handler::EmbedsMany < Restly::EmbeddedAssociations::Handler
 
   def get
-    @object_storage.set_parent
     @object_storage
   end
 

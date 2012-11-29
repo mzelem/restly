@@ -24,7 +24,7 @@ class Restly::Associations::Handler::HasOne < Restly::Associations::Handler
   def stub
     return nil unless (attributes = parent.parsed_response[name.to_s])
     attributes.slice!(*association_class.fields)
-    association_class.new(attributes)
+    association_class.new(attributes, loaded: false)
   end
 
 end
