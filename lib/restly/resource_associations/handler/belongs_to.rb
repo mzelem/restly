@@ -3,7 +3,7 @@ class Restly::Associations::Handler::BelongsTo < Restly::Associations::Handler
   before_save :set_foreign_key
 
   def get
-    @object_storage = association_class.find(foreign_key) unless @object_storage.present?
+    self.association_store ||= association_class.find(foreign_key)
     Restly::Proxies::Associations::Instance.new @object_storage, self
   end
 

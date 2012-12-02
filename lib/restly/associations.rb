@@ -24,7 +24,8 @@ module Restly::Associations
 
     self.resource_associations = HashWithIndifferentAccess.new
 
-    before_save :resource_association_handler_callbacks
+    before_save :resource_association_handler_before_save_callbacks
+    after_save :resource_association_handler_after_save_callbacks
 
     inherited do
       self.resource_associations = resource_associations.dup
@@ -46,9 +47,15 @@ module Restly::Associations
     association_handlers[name] ||= self.class.reflect_on_resource_association(name).handler(self)
   end
 
-  def resource_association_handler_callbacks
-    (@association_handlers ||= {}).each do |name, handler|
-      handler.run_callbacks
+  def resource_association_handler_before_save_callbacks
+    (@association_handlers ||= {}).values.each do |handler|
+      handler.run_before_save_callbacks
+    end
+  end
+
+  def resource_association_handler_after_save_callbacks
+    (@association_handlers ||= {}).values.each do |handler|
+      handler.run_after_save_callbacks
     end
   end
 

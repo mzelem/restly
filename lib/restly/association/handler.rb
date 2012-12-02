@@ -1,11 +1,9 @@
-class Restly::Associations::Handler
+class Restly::Associations::Handler < Restly::Associations::Handler::Base
   extend ActiveSupport::Autoload
   autoload :BelongsTo
   autoload :HasOne
   autoload :HasMany
-  autoload :Basics
-
-  include Basics
+  autoload :Base
 
   before_save do
     Array.wrap(@object_storage).each(&:save) if association.options[:autosave]

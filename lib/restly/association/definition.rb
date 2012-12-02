@@ -10,7 +10,7 @@ class Restly::Associations::Definition
 
   class << self
 
-    def define_parent_method(name, options={}, &block)
+    def define_owner_method(name, options={}, &block)
       options.assert_valid_keys(:if, :unless)
       raise Restly::Error::InvalidObject, "Must provide a block." unless block_given?
       self.method_definitions << { name: name, block: block, options: options }
@@ -90,13 +90,13 @@ class Restly::Associations::Definition
     ].compact
   end
 
-  def handler(parent)
+  def handler(owner_instance)
     definition_namespace = self.class.name.name.gsub(/(::)?\w+$/, '')
     handler = handler_type.classify
-    [definition_namespace, handler].compact.join('::').constantize.new(self, parent)
+    [definition_namespace, handler].compact.join('::').constantize.new(self, owner_instance)
   end
 
-  def write_methods_to_parent_class
+  def write_methods_to_owner_class
 
     method_definitions.each do |options|
       name = options.delete(:name)
@@ -107,8 +107,8 @@ class Restly::Associations::Definition
                 ( options[:unless] && instance_eval(&options[:unless]) )
 
       instance_eval(&name) if name.is_a?(Proc)
-      unless parent_class.method_defined?(name)
-        parent_class.send :define_method, name.to_sym, &block
+      unless owner_class.method_defined?(name)
+        owner_class.send :define_method, name.to_sym, &block
       end
     end
 

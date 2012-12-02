@@ -1,10 +1,8 @@
-class Restly::EmbeddedAssociations::Handler
+class Restly::EmbeddedAssociations::Handler < Restly::Associations::Handler::Base
   extend ActiveSupport::Autoload
   autoload :BelongsTo
   autoload :HasOne
   autoload :HasMany
-
-  include Restly::Associations::Handler::Basics
 
   def initialize(association, instance)
     super
