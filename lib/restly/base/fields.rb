@@ -1,5 +1,7 @@
 module Restly::Base::Fields
   extend ActiveSupport::Concern
+  extend Restly::Errors
+  define_error :InvalidField
 
   included do
 
@@ -24,7 +26,7 @@ module Restly::Base::Fields
         define_attribute_method attr unless instance_method_already_implemented? attr
         self.fields += [attr]
       else
-        raise Restly::Error::InvalidField, "field must be a symbol or string."
+        raise Error::InvalidField, "field must be a symbol or string."
       end
     end
 

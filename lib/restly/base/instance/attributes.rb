@@ -1,4 +1,6 @@
 module Restly::Base::Instance::Attributes
+  extend Restly::Errors
+  define_error :InvalidAttribute
 
   ATTR_MATCHER = /(?<attr>\w+)(?<setter>=)?$/
 
@@ -63,13 +65,13 @@ module Restly::Base::Instance::Attributes
           read_attribute(attr, *args)
       end
     else
-      raise Restly::Error::InvalidAttribute, "Attribute does not exist!"
+      raise Error::InvalidAttribute, "Attribute does not exist!"
     end
   end
 
   def method_missing(m, *args, &block)
     attribute_missing(m, *args)
-  rescue Restly::Error::InvalidAttribute
+  rescue Error::InvalidAttribute
     super
   end
 

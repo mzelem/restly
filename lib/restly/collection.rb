@@ -9,6 +9,9 @@ class Restly::Collection < Array
   include ErrorHandling
   include Pagination
 
+  extend Restly::Errors
+  define_error :InvalidObject
+
   delegate :resource_name, :new, :client, to: :resource
 
   attr_reader :resource, :response
@@ -48,13 +51,13 @@ class Restly::Collection < Array
   alias :collect :map
 
   def <<(instance)
-    raise Restly::Error::InvalidObject, "Object is not an instance of #{resource}" unless accepts?(instance)
+    raise Error::InvalidObject, "Object is not an instance of #{resource}" unless accepts?(instance)
     super(instance)
   end
 
   def replace(array)
     array.each do |instance|
-      raise Restly::Error::InvalidObject, "Object is not an instance of #{resource}" unless accepts?(instance)
+      raise Error::InvalidObject, "Object is not an instance of #{resource}" unless accepts?(instance)
     end
     super
   end
@@ -66,7 +69,7 @@ class Restly::Collection < Array
   private
 
   def set_response(response)
-    raise Restly::Error::InvalidResponse unless response.is_a? OAuth2::Response
+    raise Error::InvalidResponse unless response.is_a? OAuth2::Response
     @response = response
     if response.try(:body)
       if response_has_errors?(response)

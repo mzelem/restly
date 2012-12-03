@@ -1,4 +1,9 @@
+require "oauth2"
+
 class Restly::Connection < OAuth2::AccessToken
+  extend Restly::Errors
+  define_error :ServiceError
+
 
   attr_accessor :cache, :cache_options
 
@@ -131,7 +136,7 @@ class Restly::Connection < OAuth2::AccessToken
     if response.status >= 500
       site = URI.parse(client.site)
       formatted_path = ["#{site.scheme}://#{site.host}", ":#{site.port}", path].join
-      raise Restly::Error::ConnectionError, "#{response.status}: #{status_string(response.status)}\nurl: #{formatted_path}"
+      raise Error::ServiceError, "#{response.status}: #{status_string(response.status)}\nurl: #{formatted_path}"
     end
 
     # Return the response

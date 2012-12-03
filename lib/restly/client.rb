@@ -1,3 +1,5 @@
+require "oauth2"
+
 class Restly::Client < OAuth2::Client
 
   attr_accessor :id, :secret, :site, :base_path

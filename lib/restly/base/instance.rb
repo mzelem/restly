@@ -16,6 +16,9 @@ module Restly::Base::Instance
   include Comparable
   include ErrorHandling
 
+  extend Restly::Errors
+  define_error :InvalidResponse
+
   included do
     attr_reader :init_options, :response, :errors
     delegate :spec, to: :resource
@@ -88,7 +91,7 @@ module Restly::Base::Instance
   private
 
   def set_response(response)
-    raise Restly::Error::InvalidResponse unless response.is_a? OAuth2::Response
+    raise Error::InvalidResponse unless response.is_a? OAuth2::Response
     @response = response
     if response_has_errors?(response)
       set_errors_from_response

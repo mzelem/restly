@@ -42,7 +42,7 @@ module Restly
 
     def load_association(event)
       log_items = []
-      log_items << "#{event.payload[:model]}##{event.payload[:association]} Association Load".cyan
+      log_items << "#{event.payload[:model]}##{event.payload[:associations]} Association Load".cyan
       log_items << "(#{event.duration.round(1)} ms)"
 
       info "  " + log_items.join(" ")

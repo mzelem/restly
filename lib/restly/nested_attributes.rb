@@ -1,4 +1,6 @@
 module Restly::NestedAttributes
+  extend Restly::Errors
+  define_error :InvalidNestedAttribute
 
   ATTR_MATCHER = /(?<attr>\w+)_attributes=$/
 
@@ -104,13 +106,13 @@ module Restly::NestedAttributes
     if !!(matched = ATTR_MATCHER.match m) && (options = resource_nested_attributes_options[(attr = matched[:attr])])
       send( "assign_nested_attributes_for_#{options[:association_type]}_resource_association", attr, *args )
     else
-      raise Restly::Error::InvalidNestedAttribute, "Nested Attribute does not exist!"
+      raise Error::InvalidNestedAttribute, "Nested Attribute does not exist!"
     end
   end
 
   def method_missing(m, *args, &block)
     nested_attribute_missing(m, *args)
-  rescue Restly::Error::InvalidNestedAttribute
+  rescue Error::InvalidNestedAttribute
     super
   end
 

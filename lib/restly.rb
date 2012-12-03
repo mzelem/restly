@@ -1,6 +1,5 @@
 require "active_support"
 require "restly/version"
-require "oauth2"
 
 module Restly
   extend ActiveSupport::Autoload

@@ -1,26 +1,20 @@
 module Restly::Associations
 
-  ATTR_MATCHER = /(?<attr>\w+)(?<setter>=)?$/
-
   extend ActiveSupport::Concern
   extend ActiveSupport::Autoload
 
-  autoload :Base
-  autoload :BelongsTo
-  autoload :HasMany
-  autoload :HasManyThrough
-  autoload :HasOne
-  autoload :HasOneThrough
+  autoload :Adapter
   autoload :ClassMethods
-  autoload :Handler
   autoload :Definition
+  autoload :Handler
+
 
   included do
 
     include Restly::ConcernedInheritance
     include Restly::NestedAttributes
 
-    class_attribute :resource_associations, instance_reader: false, instance_writer: false
+    class_attribute :__resource_associations, instance_reader: false, instance_writer: false
 
     self.resource_associations = HashWithIndifferentAccess.new
 
@@ -47,22 +41,16 @@ module Restly::Associations
     association_handlers[name] ||= self.class.reflect_on_resource_association(name).handler(self)
   end
 
-  def resource_association_handler_before_save_callbacks
-    (@association_handlers ||= {}).values.each do |handler|
-      handler.run_before_save_callbacks
-    end
-  end
-
   def resource_association_handler_after_save_callbacks
     (@association_handlers ||= {}).values.each do |handler|
       handler.run_after_save_callbacks
     end
   end
 
-  def method_missing(m, *args, &block)
-    association_missing(m, *args)
-  rescue Restly::Error::InvalidAssociation
-    super
+  def resource_association_handler_before_save_callbacks
+    (@association_handlers ||= {}).values.each do |handler|
+      handler.run_before_save_callbacks
+    end
   end
 
 end

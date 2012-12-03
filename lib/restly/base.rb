@@ -1,3 +1,5 @@
+require 'active_model'
+
 module Restly
   class Base
     # Autoload

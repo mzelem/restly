@@ -1,5 +1,7 @@
 module Restly::Base::Includes
   extend ActiveSupport::Concern
+  extend Restly::Errors
+  define_error :InvalidClient
 
   included do
     class_attribute :current_specification, instance_writer: false
@@ -18,7 +20,7 @@ module Restly::Base::Includes
     end
 
     def client=(client)
-      raise Restly::Error::InvalidClient, "Client is invalid!" unless client.is_a?(Restly::Client)
+      raise Error::InvalidClient, "Client is invalid!" unless client.is_a?(Restly::Client)
       @client = client
       @client.resource = self
       @client
