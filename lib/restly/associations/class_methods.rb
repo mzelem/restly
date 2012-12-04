@@ -1,13 +1,13 @@
-class Restly::Associations::ClassMethods < Restly::Associations::Definition
+module Restly::Associations::ClassMethods
   extend Restly::Errors
 
   def self.extended(base)
     if descendant_of? base, Restly::Base
-      base.include Restly::Associations::Adapter::Restly
+      base.send :include, Restly::Associations::Adapter::Restly
     elsif descendant_of? base, ActiveRecord::Base
-      base.include Restly::Associations::Adapter::ActiveRecord
+      base.send :include, Restly::Associations::Adapter::ActiveRecord
     elsif descendant_of? base, Mongoid::Document
-      base.include Restly::Associations::Adapter::Mongoid
+      base.send :include, Restly::Associations::Adapter::Mongoid
     else
       raise NotImplementedError, "Associations to this type of class are not supported."
     end

@@ -1,5 +1,4 @@
 module Restly::Associations
-
   extend ActiveSupport::Concern
   extend ActiveSupport::Autoload
 
@@ -8,13 +7,12 @@ module Restly::Associations
   autoload :Definition
   autoload :Handler
 
-
   included do
 
     include Restly::ConcernedInheritance
     include Restly::NestedAttributes
 
-    class_attribute :__resource_associations, instance_reader: false, instance_writer: false
+    class_attribute :resource_associations, instance_reader: false, instance_writer: false
 
     self.resource_associations = HashWithIndifferentAccess.new
 

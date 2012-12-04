@@ -1,4 +1,4 @@
-module Restly::Associations::Callbacks
+module Restly::Associations::Handler::Callbacks
   extend ActiveSupport::Concern
   
   included do

@@ -54,7 +54,8 @@ class Restly::Associations::Handler
   end
 
   def within_duplicate(&block)
-    dup.instance_eval(&block)
+    (duplicate = dup).instance_eval(&block)
+    duplicate
   end
 
 end

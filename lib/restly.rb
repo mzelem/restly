@@ -14,7 +14,7 @@ module Restly
   autoload :LocalAssociations
   autoload :EmbeddedAssociations
   autoload :NestedAttributes
-  autoload :Error
+  autoload :Errors
   autoload :Connection
   autoload :Middleware
   autoload :ThreadLocal

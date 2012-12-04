@@ -2,8 +2,6 @@ class Restly::Associations::Definition
   extend ActiveSupport::Autoload
   extend Restly::Errors
 
-  Adapter = Restly::Associations::Adapter
-
   define_error :NoInverseForPolymorphicAssociation
   define_error :NoClassForPolymorphicAssociation
 
@@ -12,6 +10,15 @@ class Restly::Associations::Definition
   # Set a collection to hold all method procs to be defined on the owner.
   class_attribute :method_definitions, instance_writer: false
   self.method_definitions = []
+
+  def self.const_missing(constant)
+    /(?<namespace>.*)::\w+$/ =~ name
+    if (base = namespace.constantize).const_defined?(constant)
+      base.const_get constant
+    else
+      super
+    end
+  end
 
   # Class method to be defin owner methods
   def self.define_owner_method(name, options={}, &block)
@@ -85,10 +92,15 @@ class Restly::Associations::Definition
   private
 
   def handler_class
-    return PolymphicHandler if options[:polymorphic]
-    adapter = Adapter.determine(associated_class).to_s.classify
-    handler = handler_type.classify
-    adapter.constantize.const_get handler
+    if options[:polymorphic]
+      return PolymphicHandler
+    elsif (adapter = (handler_type.constantize rescue nil)).ancestors.include?(Handler)
+      adapter
+    else
+      adapter = Adapter.determine(associated_class).to_s.classify
+      handler = handler_type.classify
+      adapter.constantize.const_get handler
+    end
   end
 
   def inverse_definition

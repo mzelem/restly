@@ -9,7 +9,6 @@ module Restly
     autoload :GenericMethods
     autoload :Includes
     autoload :Fields
-    autoload :EmbeddedAssociations
     autoload :PaginationOptions
 
     # Thread Local Accessor
@@ -37,7 +36,6 @@ module Restly
 
     # Relationships
     include Restly::Associations
-    include Restly::EmbeddedAssociations
 
     # Actions & Callbacks
     extend  Resource

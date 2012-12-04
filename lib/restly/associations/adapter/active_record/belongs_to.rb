@@ -11,8 +11,8 @@ class Restly::Associations::Adapter::ActiveRecord::BelongsTo < Restly::Associati
   end
 
   def save_instance_and_update_foreign_key
-    @store.save if @store.respond_to? :save if @store.respond_to? :attributes
-    owner.attributes = { foreign_key => @store.id }
+    store.save if store.respond_to? :save if store.respond_to? :attributes
+    owner.attributes = { foreign_key => store.id }
   end
 
 end

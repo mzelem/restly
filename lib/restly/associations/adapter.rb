@@ -2,13 +2,14 @@ require 'active_support/dependencies/autoload'
 
 module Restly::Associations::Adapter
   extend ActiveSupport::Autoload
-
   autoload :ActiveRecord
   autoload :Mongoid
   autoload :Restly
 
-  def self.extended(base)
-    Builder.new(base).setup
+  extend ActiveSupport::Concern
+
+  included do
+    extend AdapterAutoload
   end
 
   def self.determine(klass)
@@ -25,49 +26,25 @@ module Restly::Associations::Adapter
     end
   end
 
-  class Builder
+  module AdapterAutoload
 
-    attr_reader :base, :included_in
-
-    def initialize(base)
-      @base = base
-      @included_in = caller[1].gsub(/\.rb:.*/,'')
-      setup
-    end
-
-    def setup
-      autoload_constants
-      define_included
-    end
-
-    private
-
-    def handlers
-      directory = File.expand_path File.join __FILE__, "..", "adapter", included_in, "*" # "../lib/restly/associations/adapter/#{adapter_name}/*"
+    def self.extended(base)
+      base.extend(ActiveSupport::Autoload)
+      directory = File.expand_path File.join __FILE__, "..", "adapter", caller[1].gsub(/\.rb:.*/, ''), "*"
       Dir.glob(directory).map do |file|
         /.*\/(?<underscore_name>.*)\.rb/ =~ file
-        underscore_name.to_sym
+        base.autoload handler.classify.to_sym
       end
     end
 
-    def autoload_constants
-      base.extend(ActiveSupport::Autoload)
-      handlers.each do |handler|
-        base.autoload handler
-      end
-    end
+  end
 
-    def define_included
-      base.define_singleton_method :included do |owner|
-        define_methods owner
-      end
-    end
+  module ClassMethods
 
-    def define_methods(owner)
-      handlers.each do |handler|
-        owner.define_singleton_method name do
-          Restly::Associations::Definition.new(self, name, handler, options)
-        end
+    def define_association_method(symbol, handler=nil)
+      handler ||= symbol
+      define_singleton_method symbol do |name, options={}|
+        Restly::Associations::Definition.new(self, name, handler, options)
       end
     end
 
