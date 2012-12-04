@@ -2,7 +2,9 @@ require "delegate"
 
 class Restly::Proxies::Base < SimpleDelegator
 
-  delegate :is_a?, :kind_of?, to: :__getobj__
+  alias :receiver_set :__setobj__
+  alias :receiver_get :__getobj__
+  delegate :is_a?, :kind_of?, to: :receiver_get
 
   # Initialize the Proxy
   def initialize(receiver)

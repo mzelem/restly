@@ -15,10 +15,10 @@ module Restly::Base::Resource::Specification::MassAssignmentSecurity
 
       # Try to set the proper authorizer!
       if spec.accessible_attributes.present?
-        __setobj__ ({ default: spec.accessible_attributes })
+        receiver_set ({ default: spec.accessible_attributes })
 
       elsif spec.protected_attributes.present?
-        __setobj__ ({ default: spec.protected_attributes })
+        receiver_set ({ default: spec.protected_attributes })
 
       end
 
@@ -45,7 +45,7 @@ module Restly::Base::Resource::Specification::MassAssignmentSecurity
 
     def reload_specification!
       accepts = spec.actions.map { |action| action['accepts_parameters'] }.flatten if spec.actions.present?
-      __setobj__ ActiveModel::MassAssignmentSecurity::WhiteList.new accepts
+      receiver_set ActiveModel::MassAssignmentSecurity::WhiteList.new accepts
     end
 
   end
@@ -68,7 +68,7 @@ module Restly::Base::Resource::Specification::MassAssignmentSecurity
 
     def reload_specification!
       rejects = spec.actions.map { |action| action['rejects_parameters'] }.flatten if spec.actions.present?
-      __setobj__ ActiveModel::MassAssignmentSecurity::BlackList.new rejects
+      receiver_set ActiveModel::MassAssignmentSecurity::BlackList.new rejects
     end
 
   end

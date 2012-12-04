@@ -1,17 +1,5 @@
 module Restly::Associations::Adapter::Restly
   extend Restly::Associations::Adapter
-  extend ActiveSupport::Autoload
-
-  autoload :BelongsTo
-  autoload :EmbeddedIn
-  autoload :EmbedsMany
-  autoload :EmbedsOne
-  autoload :HasMany
-  autoload :HasOne
-
-  def self.included(base)
-    define_association_methods base
-  end
 
   class Handler < Restly::Associations::Handler
     def path
@@ -35,8 +23,16 @@ module Restly::Associations::Adapter::Restly
       end
     end
 
-    def parent_path
-      @parent_path ||= parent.respond_to?(:path) ? parent.path : nil
+    def owner_path
+      @owner_path ||= owner.is_a?(Restly::Base) ? owner.path : nil
+    end
+
+    def proxy!
+      if association.collection?
+        Restly::Associations::Proxy::Collection(self)
+      elsif association.instace?
+        Restly::Associations::Proxy::Instance(self)
+      end
     end
 
   end

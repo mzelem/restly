@@ -2,7 +2,10 @@ class Restly::Associations::Definition
   extend ActiveSupport::Autoload
   extend Restly::Errors
 
+  Adapter = Restly::Associations::Adapter
+
   define_error :NoInverseForPolymorphicAssociation
+  define_error :NoClassForPolymorphicAssociation
 
   ALL = [] # Holds all possible Associations
 
@@ -10,16 +13,10 @@ class Restly::Associations::Definition
   class_attribute :method_definitions, instance_writer: false
   self.method_definitions = []
 
-  class << self
-
-    private
-
-    # Class method to be defin owner methods
-    def define_owner_method(name, options={}, &block)
-      raise Error::InvalidObject, "Must provide a block." unless block_given?
-      self.method_definitions << { name: name, block: block, options: options }
-    end
-
+  # Class method to be defin owner methods
+  def self.define_owner_method(name, options={}, &block)
+    raise Error::InvalidObject, "Must provide a block." unless block_given?
+    self.method_definitions << { name: name, block: block, options: options }
   end
 
   # Set the association getter on the owner
@@ -40,23 +37,24 @@ class Restly::Associations::Definition
   # Attr Readers
   attr_reader :name,          # Name of the association
               :options,       # Association Options
-              :owner_class,    # Owner class where the association is defined
-              :handler_type  # The Class that Handles the Association
+              :owner,    # Owner class where the association is defined
+              :handler_type   # The Handler for the association
 
 
-  def initialize(owner_class, name, handler_class, options={})
+  def initialize(owner, name, handler_class, options={})
     # Set instance vars
     @name = name
     @handler_type = handler_class
-    @owner_class = owner_class
+    @owner = owner
     @options = options.freeze
 
-    write_methods_to_owner_class
+    write_methods_to_owner
     ALL << self
   end
 
   # The class for the associated objects
   def associated_class
+    raise Error::NoClassForPolymorphicAssociation, "This association has no inverse definition because it is Polymorphic." if options[:polymorphic]
     @associated_class ||= [
       options[:namespace],
       (options[:class_name] || name.to_s.classify)
@@ -87,22 +85,23 @@ class Restly::Associations::Definition
   private
 
   def handler_class
-    adapter = Adapter.determine(associated_class).classify
+    return PolymphicHandler if options[:polymorphic]
+    adapter = Adapter.determine(associated_class).to_s.classify
     handler = handler_type.classify
     adapter.constantize.const_get handler
   end
 
   def inverse_definition
     raise Error::NoInverseForPolymorphicAssociation, "This association has no inverse definition because it is Polymorphic." if options[:polymorphic]
-    ALL.find { |definition| definition.associated_class == owner_class }
+    ALL.find { |definition| definition.associated_class == owner }
   end
 
   # The namespace in which the associated class exists
   def namespace
-    @namspace ||= options[:namespace] || owner_class.name.gsub(/(::)?\w+$/, '')
+    @namspace ||= options[:namespace] || owner.name.gsub(/(::)?\w+$/, '')
   end
 
-  def write_methods_to_owner_class
+  def write_methods_to_owner
 
     method_definitions.each do |options|
       name = options.delete(:name)
@@ -115,9 +114,37 @@ class Restly::Associations::Definition
                 ( options[:unless] && instance_eval(&options[:unless]) )
 
       instance_eval(&name) if name.is_a?(Proc)
-      unless owner_class.method_defined?(name)
-        owner_class.send :define_method, name.to_sym, &block
+      unless owner.method_defined?(name)
+        owner.send :define_method, name.to_sym, &block
       end
+    end
+
+  end
+
+  class PolymorphicHandler < BasicObject
+
+    attr_reader :owner, :association
+
+    def initialize(association, owner)
+      @owner = owner
+      @association = association
+    end
+
+    def adapter(instance = nil)
+      associated_class = instance.try(:class) || owner.send("#{association.name}_type")
+      adapter_class = Adapter.determine(associated_class).to_s.classify
+      adapter_class.new(association, owner)
+    rescue
+      nil
+    end
+
+    def get
+      return nil unless adapter
+      adapter.get
+    end
+
+    def set(instance)
+      adapter(instance).set(instance)
     end
 
   end

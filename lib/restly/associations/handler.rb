@@ -1,30 +1,26 @@
 class Restly::Associations::Handler
+  extend ActiveSupport::Autoload
+  autoload :Callbacks
+  include Callbacks
+
   extend Restly::Errors
   define_error :InvalidCallback
+  define_error :WrongTypeOfInstance
 
-  attr_reader :association, :owner
-    delegate :name, :foreign_key, to: :association
-    class_attribute :after_save_callbacks, :before_save_callbacks, instance_writer: false
-    self.after_save_callbacks = []
-    self.before_save_callbacks = []
+  attr_reader :association, :owner, :store
+  delegate :name, :foreign_key, to: :association
 
-  def self.after_save(method=nil, &block)
-    self.after_save_callbacks << method || block
-  end
-
-  def self.before_save(method=nil, &block)
-    self.before_save_callbacks << method || block
-  end
+  private
 
   def initialize(association, owner)
     @owner = owner
     @association = association
-    @association_class = instance.send "#{association.name}_type" if association.options[:polymorphic]
-    @object_storage ||= stub if respond_to? :stub
+    @associated_class = instance.send "#{association.name}_type" if association.options[:polymorphic]
+    stub if respond_to? :stub
   end
 
-  def association_class
-    @association_class || association.association_class
+  def associated_class
+    @associated_class || association.associated_class
   end
 
   def get
@@ -39,29 +35,21 @@ class Restly::Associations::Handler
     raise NotImplemented
   end
 
-  def run_after_save_callbacks
-    after_save_callbacks.each do |callback|
-      case callback
-        when Symbol
-          send(callback)
-        when Proc
-          instance_eval(&callback)
-        else
-          raise Error::InvalidCallback, "Callback must be a symbol or proc."
-      end
-    end
+  def store_set(instance)
+    @store = instance
+    validate!
   end
 
-  def run_before_save_callbacks
-    before_save_callbacks.each do |callback|
-      case callback
-        when Symbol
-          send(callback)
-        when Proc
-          instance_eval(&callback)
-        else
-          raise Error::InvalidCallback, "Callback must be a symbol or proc."
-      end
+  def store_get
+    @store
+  end
+
+  def validate!
+    if Array.wrap(store).find { store.class != associated_class }
+      @store = nil
+      raise Error::WrongTypeOfInstance, "#{store} must be an instance of #{associated_class}"
+    else
+      store
     end
   end
 
