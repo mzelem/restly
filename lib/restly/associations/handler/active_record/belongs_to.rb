@@ -1,4 +1,4 @@
-class Restly::Associations::Adapter::ActiveRecord::BelongsTo < Restly::Associations::Handler
+class Restly::Associations::Handler::ActiveRecord::BelongsTo < Restly::Associations::Handler
 
   before_save :save_instance_and_update_foreign_key
 

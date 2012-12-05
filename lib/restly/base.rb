@@ -35,7 +35,7 @@ module Restly
     include Restly::ConcernedInheritance
 
     # Relationships
-    include Restly::Associations
+    include ::Restly::Associations
 
     # Actions & Callbacks
     extend  Resource
@@ -56,12 +56,12 @@ module Restly
                     :cache_options,
                     :client_token
 
-    self.include_root_in_json =   Restly::Configuration.include_root_in_json
-    self.cache                =   Restly::Configuration.cache
-    self.cache_options        =   Restly::Configuration.cache_options
+    self.include_root_in_json =   ::Restly::Configuration.include_root_in_json
+    self.cache                =   ::Restly::Configuration.cache
+    self.cache_options        =   ::Restly::Configuration.cache_options
     self.params               =   {}
     self.current_token        =   {}
-    self.client_token         =   Restly::Configuration.use_oauth ? (client.client_credentials.get_token rescue nil) : nil
+    self.client_token         =   ::Restly::Configuration.use_oauth ? (client.client_credentials.get_token rescue nil) : nil
 
     # Set Defaults on Inheritance
     inherited do

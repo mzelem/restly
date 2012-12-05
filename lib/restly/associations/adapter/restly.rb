@@ -25,9 +25,9 @@ module Restly::Associations::Adapter::Restly
 
     def proxy!
       if association.collection?
-        Restly::Associations::Proxy::Collection(self)
+        ::Restly::Associations::Proxy::Collection(self)
       elsif association.instace?
-        Restly::Associations::Proxy::Instance(self)
+        ::Restly::Associations::Proxy::Instance(self)
       end
     end
 

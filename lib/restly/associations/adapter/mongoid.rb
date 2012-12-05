@@ -1,4 +1,4 @@
-module Restly::Associations::Adapter::Mongoid
+module Restly::Associations::Adapter::MongoidAdapter
   include Restly::Associations::Adapter
 
   define_association_method :belongs_to_resource, "Adapter::Restly::BelongsTo"

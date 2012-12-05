@@ -1,4 +1,4 @@
-module Restly::Associations::Adapter::ActiveRecord
+module Restly::Associations::Adapter::ActiveRecordAdapter
   include Restly::Associations::Adapter
 
   define_association_method :belongs_to_resource, "Adapter::Restly::BelongsTo"

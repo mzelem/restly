@@ -1,28 +1,31 @@
 module Restly::Associations
-  extend ActiveSupport::Concern
   extend ActiveSupport::Autoload
+  include Restly::ConcernedInheritance
+  include Restly::NestedAttributes
 
   autoload :Adapter
   autoload :ClassMethods
   autoload :Definition
   autoload :Handler
 
-  included do
+  def self.included(base)
+    load_adapter(base)
 
-    include Restly::ConcernedInheritance
-    include Restly::NestedAttributes
-
-    class_attribute :resource_associations, instance_reader: false, instance_writer: false
+    base.class_attribute :resource_associations, instance_reader: false, instance_writer: false
 
     self.resource_associations = HashWithIndifferentAccess.new
 
     before_save :resource_association_handler_before_save_callbacks
     after_save :resource_association_handler_after_save_callbacks
 
-    inherited do
+    base.inherited do
       self.resource_associations = resource_associations.dup
     end
 
+  end
+
+  def self.load_adapter(base)
+    puts "trying to load adapter!"
   end
 
   def resource_name
@@ -41,13 +44,13 @@ module Restly::Associations
 
   def resource_association_handler_after_save_callbacks
     (@association_handlers ||= {}).values.each do |handler|
-      handler.run_after_save_callbacks
+      handler.run_callbacks(:after_save)
     end
   end
 
   def resource_association_handler_before_save_callbacks
     (@association_handlers ||= {}).values.each do |handler|
-      handler.run_before_save_callbacks
+      handler.run_callbacks(:before_save)
     end
   end
 
