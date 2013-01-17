@@ -5,13 +5,10 @@ module Restly
     autoload :Resource
     autoload :Instance
     autoload :GenericMethods
-    autoload :Includes
+    autoload :ClassMethods
     autoload :Fields
     autoload :EmbeddedAssociations
     autoload :PaginationOptions
-
-    # Thread Local Accessor
-    extend Restly::ThreadLocal
 
     # Active Model
     extend  ActiveModel::Naming
@@ -39,7 +36,7 @@ module Restly
 
     # Actions & Callbacks
     extend  Resource
-    include Includes
+    include ClassMethods
     include Instance
     include Fields
 
@@ -60,8 +57,8 @@ module Restly
     self.cache                =   Restly::Configuration.cache
     self.cache_options        =   Restly::Configuration.cache_options
     self.params               =   {}
-    self.current_token        =   {}
-    self.client_token         =   Restly::Configuration.use_oauth ? (client.client_credentials.get_token rescue nil) : nil
+    #self.current_token        =   {}
+    #self.client_token         =   Restly::Configuration.use_oauth ? (client.client_credentials.get_token rescue nil) : nil
 
     # Set Defaults on Inheritance
     inherited do
@@ -70,20 +67,20 @@ module Restly
       self.resource_name      = name.gsub(/.*::/,'').underscore if name.present?
       self.path               = resource_name.pluralize
       self.params             = params.dup
-      self.client             = client.dup
+      self.connection_builder = client.dup
     end
 
     # Run Active Support Load Hooks
     ActiveSupport.run_load_hooks(:restly, self)
 
-    # Alias the class for delegation
-    def client
-      self.class.client
-    end
-
-    def resource
-      self.class
-    end
+    ## Alias the class for delegation
+    #def client
+    #  self.class.client
+    #end
+    #
+    #def resource
+    #  self.class
+    #end
 
   end
 end
