@@ -20,11 +20,13 @@ Gem::Specification.new do |gem|
   gem.add_dependency "activesupport", "~> 3.2"
   gem.add_dependency "activemodel", "~> 3.2"
   gem.add_dependency "colorize", "~> 0.5.8"
+  gem.add_dependency "faraday", "~> 0.8.4"
+  gem.add_dependency "faraday_middleware", "~> 0.9"
+  gem.add_dependency "concerned_inheritance"
 
   gem.add_development_dependency "rspec", "~> 2.12"
   gem.add_development_dependency "pry", "~> 9.10"
   gem.add_development_dependency "faraday_simulation", "~> 0.0.2"
-  gem.add_development_dependency "faraday_middleware", "~> 0.9"
   gem.add_development_dependency "multi_xml", "~> 0.5"
 
 end
