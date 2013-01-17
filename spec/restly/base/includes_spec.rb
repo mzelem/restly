@@ -1,7 +1,7 @@
 require "rspec"
 require "spec_helper"
 
-describe Restly::Base::Includes do
+describe Restly::Base::ClassMethods do
 
   it "should have specs"
 
