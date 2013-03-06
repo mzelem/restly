@@ -18,7 +18,7 @@ class Restly::Connection < OAuth2::AccessToken
 
     elsif object.is_a?(Restly::Middleware)
 
-      /(?<token>\w+)$/i =~ object.env['HTTP_AUTHORIZATION']
+      /bearer\s+(?<token>\w+)$/i =~ object.env['HTTP_AUTHORIZATION']
       return from_rack_request(client, object) if token
       token_hash = object.env['rack.session'][Restly::Configuration.session_key] || {}
       from_hash(client, token_hash)
